@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 200" role="img" aria-label="MuleNet mule carrying a layered parcel">
+  <g fill="#6b4a33" stroke="#2b1d14" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <!-- tail -->
+    <path d="M38 92 C22 100 18 120 24 138" fill="none"/>
+    <path d="M20 132 l4 14 l8-10 z" fill="#2b1d14"/>
+    <!-- back legs -->
+    <rect x="48" y="118" width="16" height="58" rx="6"/>
+    <rect x="70" y="120" width="16" height="56" rx="6"/>
+    <!-- front legs -->
+    <rect x="132" y="120" width="16" height="56" rx="6"/>
+    <rect x="154" y="118" width="16" height="58" rx="6"/>
+    <!-- body -->
+    <ellipse cx="108" cy="104" rx="72" ry="36"/>
+    <!-- neck -->
+    <path d="M150 92 L176 50 L198 60 L176 112 Z"/>
+    <!-- ears: the whole point of a mule -->
+    <path d="M178 46 C170 18 172 4 180 2 C188 8 190 26 186 46 Z"/>
+    <path d="M192 48 C194 20 202 8 210 10 C214 18 206 34 198 52 Z"/>
+    <!-- head -->
+    <path d="M176 44 C196 36 222 52 230 76 C234 88 224 96 212 92 L186 78 Z"/>
+    <!-- mane -->
+    <path d="M168 54 l6-6 l2 8 l6-6 l1 8 l6-5" fill="none"/>
+  </g>
+  <!-- muzzle, eye, nostril -->
+  <ellipse cx="220" cy="82" rx="12" ry="10" fill="#c9a27e" stroke="#2b1d14" stroke-width="4"/>
+  <circle cx="198" cy="60" r="4.5" fill="#2b1d14"/>
+  <circle cx="224" cy="80" r="2.5" fill="#2b1d14"/>
+  <!-- hooves -->
+  <g fill="#2b1d14"><rect x="46" y="170" width="20" height="10" rx="3"/><rect x="68" y="170" width="20" height="10" rx="3"/><rect x="130" y="170" width="20" height="10" rx="3"/><rect x="152" y="170" width="20" height="10" rx="3"/></g>
+  <!-- the parcel: nested sleeves, like the app icon -->
+  <g stroke-linejoin="round">
+    <rect x="66" y="34" width="84" height="64" rx="10" fill="#e8663a" stroke="#2b1d14" stroke-width="4"/>
+    <rect x="78" y="44" width="60" height="44" rx="7" fill="#f08c5a" stroke="#2b1d14" stroke-width="3"/>
+    <rect x="90" y="53" width="36" height="26" rx="5" fill="#f6b282" stroke="#2b1d14" stroke-width="3"/>
+    <rect x="100" y="60" width="16" height="12" rx="2" fill="#fad6b4" stroke="#2b1d14" stroke-width="2.5"/>
+  </g>
+  <!-- strap -->
+  <path d="M66 92 L60 118 M150 92 L156 118" stroke="#2b1d14" stroke-width="4" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MuleNet — a physical mixnet, carried by mules</title>
+<meta name="description" content="Send a parcel through a chain of friends' hubs so nobody can link sender and recipient. Onion labels, sealed sleeves, and a deep respect for mules. Untested draft.">
+<link rel="icon" href="mule.svg" type="image/svg+xml">
+<meta property="og:title" content="MuleNet — a physical mixnet, carried by mules">
+<meta property="og:description" content="Onion routing for boxes. The mules never know where it's going. Nothing has been shipped yet.">
+<meta name="theme-color" content="#e8663a">
+<style>
+:root{
+  --ground:#f6efe4; --surface:#fffaf2; --surface-2:#efe4d4;
+  --ink:#2b1d14; --ink-soft:#5c4636; --ink-faint:#8a7462;
+  --accent:#d4552a; --accent-2:#f08c5a; --accent-3:#f6b282; --core:#fad6b4;
+  --hide:#6b4a33; --ok:#2f7d32; --warn:#9a5b00;
+  --line:rgba(43,29,20,.16); --line-soft:rgba(43,29,20,.07);
+  --shadow:0 2px 4px rgba(43,29,20,.06),0 14px 36px rgba(43,29,20,.10);
+  --hard:4px 4px 0 var(--ink);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#15100c; --surface:#1f1813; --surface-2:#2a2019;
+  --ink:#f3e6d6; --ink-soft:#cdb8a4; --ink-faint:#9b8572;
+  --accent:#f0814f; --accent-2:#f5a273; --accent-3:#f8c49c; --core:#fbe0c4;
+  --hide:#a07a5c; --ok:#7fc77f; --warn:#e8b25a;
+  --line:rgba(243,230,214,.16); --line-soft:rgba(243,230,214,.06);
+  --shadow:0 2px 4px rgba(0,0,0,.35),0 16px 44px rgba(0,0,0,.5);
+  --hard:4px 4px 0 rgba(0,0,0,.6);
+}}
+:root[data-theme="dark"]{
+  --ground:#15100c; --surface:#1f1813; --surface-2:#2a2019;
+  --ink:#f3e6d6; --ink-soft:#cdb8a4; --ink-faint:#9b8572;
+  --accent:#f0814f; --accent-2:#f5a273; --accent-3:#f8c49c; --core:#fbe0c4;
+  --hide:#a07a5c; --ok:#7fc77f; --warn:#e8b25a;
+  --line:rgba(243,230,214,.16); --line-soft:rgba(243,230,214,.06);
+  --shadow:0 2px 4px rgba(0,0,0,.35),0 16px 44px rgba(0,0,0,.5);
+  --hard:4px 4px 0 rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:
+  repeating-linear-gradient(115deg,transparent 0 46px,var(--line-soft) 46px 47px),
+  var(--ground);
+  color:var(--ink);font:17px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.serif{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+.mono{font-family:ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace}
+.wrap{max-width:1060px;margin:0 auto;padding:0 22px}
+a{color:inherit}
+h1,h2,h3{margin:0;line-height:1.08;text-wrap:balance}
+h2{font-size:clamp(28px,4vw,42px);margin-bottom:14px}
+h3{font-size:19px;margin-bottom:6px}
+p{margin:0 0 14px}
+section{padding:clamp(46px,7vw,88px) 0}
+.eyebrow{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+.lede{font-size:clamp(18px,2.2vw,21px);color:var(--ink-soft);max-width:640px}
+.muted{color:var(--ink-faint)}
+nav{display:flex;gap:18px;align-items:center;padding:16px 0;flex-wrap:wrap;font-size:15px}
+nav .mark{display:flex;gap:9px;align-items:center;font-weight:800;font-size:19px;text-decoration:none}
+nav .mark img{width:34px;height:auto}
+nav a{text-decoration:none;color:var(--ink-soft)}
+nav a:hover{color:var(--accent)}
+nav .spacer{flex:1}
+#themeBtn{background:none;border:1px solid var(--line);border-radius:999px;color:var(--ink-soft);padding:4px 12px;cursor:pointer;font:inherit;font-size:13px}
+
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:30px;align-items:center;padding:24px 0 10px}
+@media(max-width:820px){.hero{grid-template-columns:1fr}.hero .art{order:-1;max-width:320px}}
+.hero h1{font-size:clamp(40px,6.4vw,70px);letter-spacing:-.02em}
+.hero h1 em{color:var(--accent);font-style:normal}
+.art{position:relative;margin-top:60px}
+.art img{width:100%;height:auto;filter:drop-shadow(0 18px 24px rgba(43,29,20,.18))}
+.bubble{position:absolute;top:-58px;left:2%;background:var(--surface);border:2px solid var(--ink);border-radius:16px;padding:8px 12px;font-size:14px;font-weight:600;box-shadow:var(--hard);max-width:230px}
+.bubble::after{content:"";position:absolute;bottom:-12px;left:60%;border:10px solid transparent;border-top-color:var(--ink);border-bottom:0}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.btn{display:inline-block;padding:11px 18px;border-radius:12px;border:2px solid var(--ink);text-decoration:none;font-weight:700;background:var(--surface);box-shadow:var(--hard);transition:transform .08s}
+.btn:hover{transform:translate(-1px,-1px)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--ink)}
+
+.warn{margin-top:28px;border:2px dashed var(--warn);border-radius:16px;padding:16px 20px;background:color-mix(in srgb,var(--warn) 9%,transparent)}
+.warn strong{color:var(--warn)}
+.warn ul{margin:6px 0 0;padding-left:20px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:22px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow)}
+.card .k{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);font-weight:700}
+.card .v{font-weight:800;margin:2px 0 8px;font-size:18px}
+.vs{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink-soft)}
+.vs b{color:var(--ink)}
+
+/* demo */
+.demo{background:var(--surface);border:2px solid var(--ink);border-radius:22px;padding:20px;box-shadow:var(--hard);margin-top:24px}
+.lane{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:end;position:relative;margin:8px 0 6px}
+.stop{text-align:center;cursor:pointer;border-radius:14px;padding:8px 4px;border:2px solid transparent;background:none;color:inherit;font:inherit}
+.stop:hover,.stop.sel{border-color:var(--line);background:var(--surface-2)}
+.stop img{width:min(88px,90%);height:72px;object-fit:contain}
+.stop .who{font-weight:800;font-size:15px}
+.stop .where{font-size:12.5px;color:var(--ink-faint)}
+.stop .icon{font-size:44px;line-height:64px;height:64px;display:block}
+.track{position:relative;height:110px;margin:4px 0 8px;border-bottom:3px dotted var(--line)}
+#parcel{position:absolute;bottom:6px;left:0;transition:left .9s cubic-bezier(.5,.1,.3,1);width:96px}
+#parcel svg{width:96px;height:auto;overflow:visible}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.controls button{font:inherit;font-weight:700;border:2px solid var(--ink);border-radius:10px;padding:8px 14px;background:var(--accent);color:#fff;cursor:pointer;box-shadow:var(--hard)}
+.controls button.ghost{background:var(--surface);color:var(--ink)}
+.controls button:disabled{opacity:.45;cursor:default}
+.knows{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:720px){.knows{grid-template-columns:1fr}.stop img{width:56px}.stop .where{display:none}}
+.panel{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--ground)}
+.panel h3{display:flex;gap:8px;align-items:center}
+.panel ul{margin:6px 0 0;padding-left:0;list-style:none}
+.panel li{padding:3px 0 3px 26px;position:relative;font-size:15px}
+.panel li::before{position:absolute;left:0;font-weight:900}
+.panel li.y::before{content:"✓";color:var(--ok)}
+.panel li.n::before{content:"✕";color:var(--accent)}
+.labelbox{font-size:12px;word-break:break-all;color:var(--ink-soft);background:var(--surface-2);border-radius:8px;padding:8px 10px;margin-top:6px}
+.log{font-size:14px;color:var(--ink-soft);min-height:44px}
+
+.pun{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;background:var(--surface);border:2px solid var(--ink);border-radius:22px;padding:22px 24px;box-shadow:var(--hard);margin-bottom:22px}
+.pun img{width:120px}
+@media(max-width:640px){.pun{grid-template-columns:1fr}.pun img{width:90px}}
+.pun .big{font-size:clamp(22px,3vw,30px);font-weight:800;line-height:1.15}
+.list{display:grid;gap:12px;margin-top:8px}
+.item{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.item .n{width:34px;height:34px;border-radius:10px;background:var(--accent);color:#fff;font-weight:900;display:grid;place-items:center}
+.item p{margin:0;color:var(--ink-soft);font-size:15.5px}
+.open .item .n{background:var(--surface-2);color:var(--ink);border:2px dashed var(--ink-faint)}
+.stack{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.tag{border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:14px;background:var(--surface)}
+footer{padding:40px 0 60px;color:var(--ink-faint);font-size:14px;border-top:1px solid var(--line)}
+footer .row{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <a class="mark" href="#"><img src="mule.svg" alt="">MuleNet</a>
+  <a href="#trick">the trick</a>
+  <a href="#demo">follow a parcel</a>
+  <a href="#welfare">mule welfare</a>
+  <a href="#unsolved">not solved yet</a>
+  <a href="#help">be a mule</a>
+  <span class="spacer"></span>
+  <a href="https://github.com/vpavlin/mulenet">github</a>
+  <button id="themeBtn" type="button" aria-label="Toggle dark mode">theme</button>
+</nav>
+
+<header class="hero">
+  <div>
+    <div class="eyebrow">A physical mixnet · draft</div>
+    <h1 class="serif">Your parcel, carried by mules who have <em>no idea</em> where it's going.</h1>
+    <p class="lede" style="margin-top:18px">MuleNet sends a box through a chain of friends' hubs. Each hub peels one layer, re-boxes it and passes it on, knowing only who handed it over and who's next. Nobody along the way, not the hubs, not the post, can connect the sender to the recipient.</p>
+    <div class="cta">
+      <a class="btn primary" href="#demo">Follow a parcel</a>
+      <a class="btn" href="#welfare">How we look after the mules</a>
+      <a class="btn" href="https://github.com/vpavlin/mulenet">Read the code</a>
+    </div>
+  </div>
+  <div class="art">
+    <div class="bubble">I carry it. I don't open it. I don't ask. Hee-haw.</div>
+    <img src="mule.svg" alt="A mule carrying a parcel wrapped in layers">
+  </div>
+</header>
+
+<div class="warn">
+  <strong>Honest status: zero parcels have been carried. The mules haven't left the stable.</strong>
+  <ul>
+    <li>The software exists and passes its tests: the onion labels, the hub directory, the receipts. It ran end to end on the Logos test network and in Basecamp.</li>
+    <li>No real box has gone through a real hub. The first trial will be a 3D-printed mule passed between a few friends.</li>
+    <li>Nobody independent has reviewed any of this. Some hard problems are <a href="#unsolved">still open</a>. Don't send anything you'd miss, and don't send anything you shouldn't.</li>
+  </ul>
+  <p style="margin:10px 0 0">We're publishing early so the rough edges get found before people start trying it for real.</p>
+</div>
+
+<section id="trick">
+  <div class="eyebrow">The trick</div>
+  <h2 class="serif">Onion routing, but with hooves.</h2>
+  <p class="lede">Mixnets hide who's talking to whom by passing messages through relays that each strip one layer of encryption. MuleNet does the same thing with cardboard.</p>
+  <div class="grid">
+    <div class="card"><div class="k">The onion</div><div class="v">A label that peels</div><p class="muted">The QR label is a fixed-size onion. Each hub scans it and learns only where to send the box next, then prints a fresh label for the next leg. Every label is the same size, so no hub can tell how far the box has come.</p></div>
+    <div class="card"><div class="k">The layers</div><div class="v">One sleeve per mule</div><p class="muted">The item sits inside one sealed sleeve per hop. Each hub takes off exactly one and checks its seal code. The hubs on either side of an honest hub never even see the same wrapping.</p></div>
+    <div class="card"><div class="k">The disguise</div><div class="v">New box, same weight</div><p class="muted">Hubs throw the old box away, use a plain standard one and pad it to a standard weight. They hold the box a few random days and ship on fixed batch days, so arrival and departure don't line up.</p></div>
+    <div class="card"><div class="k">The receipts</div><div class="v">Hee-haws over Logos</div><p class="muted">Each hub posts "received" and "shipped" receipts over Logos Messaging. They're sealed so only the sender, and the hubs either side, can read them. The sender sees progress; nobody else sees a route.</p></div>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="eyebrow">Follow a parcel</div>
+  <h2 class="serif">Who knows what, one hop at a time.</h2>
+  <p class="lede">Press <b>Next hop</b>. Click anyone in the lane to see what they know. (Spoiler: the mules know very little, which is the point.)</p>
+  <div class="demo">
+    <div class="lane" id="lane"></div>
+    <div class="track"><div id="parcel"></div></div>
+    <div class="log" id="log">The sender has packed a 3D-printed mule in three sleeves and printed the first label.</div>
+    <div class="controls">
+      <button id="next" type="button">Next hop</button>
+      <button id="reset" class="ghost" type="button">Start over</button>
+      <span class="muted" style="font-size:14px" id="hopno"></span>
+    </div>
+    <div class="knows">
+      <div class="panel"><h3 id="kTitle">The sender</h3><ul id="kList"></ul></div>
+      <div class="panel"><h3>The label on the box right now</h3><div class="labelbox mono" id="labelNow"></div><p class="muted" style="font-size:13.5px;margin:8px 0 0">Every leg gets a new label: same size, no shared bytes, nothing a person can read.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="welfare">
+  <div class="eyebrow">Mule welfare</div>
+  <div class="pun">
+    <img src="mule.svg" alt="">
+    <div>
+      <div class="big serif">Every mule has a donkey for a father. We take family seriously: nobody here gets made an ass of.</div>
+      <p class="muted" style="margin:8px 0 0">The hubs are the mules. They do the carrying, so they get the protections. (A donkey dad is called a <i>jack</i>. A jackass is anyone who hands a mule something it can't see into and hopes for the best. We're <a href="#unsolved">working on that one</a>.)</p>
+    </div>
+  </div>
+  <div class="list">
+    <div class="item"><div class="n">1</div><div><h3>No mule's home address, ever</h3><p>A hub's address is never published. It's sealed hub-to-hub, so only the hubs it chooses to receive from can read it. Senders never get one; they hand parcels over at a public intake, like a Logos Circle meetup or a parcel locker.</p></div></div>
+    <div class="item"><div class="n">2</div><div><h3>Mules don't open the luggage</h3><p>Nobody looks inside, the same way the post office doesn't. A hub weighs and measures the box, checks one seal code, and takes off one outer sleeve. That's all.</p></div></div>
+    <div class="item"><div class="n">3</div><div><h3>Mules say no whenever they like</h3><p>Every hub publishes what it's willing to carry: anything, or declared categories only. A hub can refuse any parcel, and the refusal goes back to the sender.</p></div></div>
+    <div class="item"><div class="n">4</div><div><h3>Every handover leaves an alibi</h3><p>When the next hub confirms "received, seal intact", that receipt is the previous hub's proof that it passed the parcel on untouched. It's sealed, never public.</p></div></div>
+    <div class="item"><div class="n">5</div><div><h3>Only vetted mules on the route</h3><p>Routes only use hubs vouched for by a steward the sender trusts, such as a Logos Circle steward or the sender themselves. Mules are stubborn about privacy. We consider that a feature.</p></div></div>
+  </div>
+</section>
+
+<section id="unsolved" class="open">
+  <div class="eyebrow">Not solved yet</div>
+  <h2 class="serif">Things the mules are still chewing on.</h2>
+  <p class="lede">These are written up in the repo, and they're the reason nothing real should travel yet.</p>
+  <div class="list">
+    <div class="item"><div class="n">?</div><div><h3>What's in the box?</h3><p>The big one. A hub can't check a sealed parcel without opening it, and opening it breaks the whole idea. We haven't found a way to keep the sender private <i>and</i> keep the hub safe from what it can't see. For now: no inspection, declared categories, refuse freely, and only send between people who trust each other. <a href="https://github.com/vpavlin/mulenet/blob/main/docs/OPEN-PROBLEMS.md">Ideas welcome.</a></p></div></div>
+    <div class="item"><div class="n">?</div><div><h3>A herd of three is easy to follow</h3><p>A mixnet hides you in a crowd. With a handful of parcels, colluding hubs can link sender and recipient by timing alone. More parcels, shared batch days and decoy boxes should help; none of that is built.</p></div></div>
+    <div class="item"><div class="n">?</div><div><h3>Carrier accounts want your phone number</h3><p>Lockers and couriers often need a phone number or email, which can identify a hub to the carrier. That needs per-country research.</p></div></div>
+    <div class="item"><div class="n">?</div><div><h3>No way back</h3><p>A refused parcel has no return path yet, and borders need customs forms with a name on them. Domestic routes, or within the EU, for now.</p></div></div>
+  </div>
+</section>
+
+<section id="help">
+  <div class="eyebrow">Be a mule</div>
+  <h2 class="serif">We're looking for a small, patient herd.</h2>
+  <p class="lede">The plan is to get the boring parts ready now, so it works when the first people try it.</p>
+  <div class="grid">
+    <div class="card"><div class="k">Run a hub</div><div class="v">Friends first</div><p class="muted">Got a parcel locker nearby, a few plain boxes and a kitchen scale? Read the <a href="https://github.com/vpavlin/mulenet/blob/main/docs/HUB-GUIDE.md">hub guide</a> and tell us your city. We're starting with a handful of people in the EU.</p></div>
+    <div class="card"><div class="k">Logos Circles</div><div class="v">Stewards &amp; meetups</div><p class="muted">Circles meet in person every month, which makes them a natural place to hand over parcels, and their stewards natural people to vouch for hubs. There are 58 active Circles in 36 countries.</p></div>
+    <div class="card"><div class="k">Builders</div><div class="v">Poke holes in it</div><p class="muted">Read the <a href="https://github.com/vpavlin/mulenet/blob/main/docs/SPEC.md">spec</a> and the <a href="https://github.com/vpavlin/mulenet/blob/main/docs/THREAT-MODEL.md">threat model</a>, and break things. An Android hub app (scan, peel, print) is next.</p></div>
+  </div>
+  <p style="margin-top:22px" class="muted">Built on the Logos stack:</p>
+  <div class="stack">
+    <span class="tag">Basecamp module (desktop)</span>
+    <span class="tag">Loam / Logos Messaging</span>
+    <span class="tag">loam-sync event log + RBSR</span>
+    <span class="tag">Sphinx-style onion labels</span>
+    <span class="tag">LEZ for payments - later</span>
+  </div>
+</section>
+
+<footer>
+  <div class="row">
+    <img src="mule.svg" alt="" width="40">
+    <span>MuleNet · MIT or Apache-2.0 · <a href="https://github.com/vpavlin/mulenet">github.com/vpavlin/mulenet</a></span>
+  </div>
+  <p style="margin-top:10px">No mules were harmed in the making of this protocol. Several were confused, which is how it's supposed to work.</p>
+</footer>
+</div>
+
+<script>
+// theme toggle (light default, follows the OS until clicked)
+(function () {
+  var b = document.getElementById("themeBtn");
+  var saved = null; try { saved = localStorage.getItem("mn-theme"); } catch (e) {}
+  if (saved) document.documentElement.setAttribute("data-theme", saved);
+  b.onclick = function () {
+    var cur = document.documentElement.getAttribute("data-theme") ||
+      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    var next = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem("mn-theme", next); } catch (e) {}
+  };
+})();
+
+// ---- the demo -------------------------------------------------------------
+var STOPS = [
+  { who: "Sender", where: "somewhere", img: "person.svg", knows: [
+    ["y", "the whole route: Prague, Berlin, Madrid"], ["y", "what's inside"],
+    ["n", "any hub's address"], ["n", "where the recipient picks it up"] ] },
+  { who: "Mule 1", where: "Prague", mule: true, knows: [
+    ["y", "the sender handed it over at the Circle meetup"], ["y", "Berlin's locker address (sealed to Prague only)"],
+    ["n", "what's inside"], ["n", "the recipient, or that Madrid exists on this route"] ] },
+  { who: "Mule 2", where: "Berlin", mule: true, knows: [
+    ["y", "a box came from Prague"], ["y", "Madrid's locker address (sealed to Berlin only)"],
+    ["n", "who sent it, or who it's for"], ["n", "how many hops are left"] ] },
+  { who: "Mule 3", where: "Madrid", mule: true, knows: [
+    ["y", "a box came from Berlin"], ["y", "the recipient's pickup locker (sealed to Madrid only)"],
+    ["n", "who sent it"], ["n", "what's inside"] ] },
+  { who: "Recipient", where: "a locker", img: "locker.svg", knows: [
+    ["y", "a parcel arrived for them"], ["y", "what's inside, once opened"],
+    ["n", "the route it took"], ["n", "any hub's address"] ] }
+];
+var LOGS = [
+  "The sender has packed a 3D-printed mule in three sleeves and printed the first label.",
+  "Prague scans the label: seal code matches. It takes off sleeve 1, throws away the box, re-boxes, pads to 450 g and prints a new label. Ships Thursday.",
+  "Berlin peels its layer. It can't tell this is the middle hop: the label is exactly the same size. Off comes sleeve 2, into a fresh box. Ships Friday.",
+  "Madrid peels the last layer and learns the pickup point. Off comes sleeve 3; the core goes to the recipient's locker. A 'ready' notice goes out.",
+  "Delivered. The sender's tracker shows received → shipped → delivered. Nobody else saw the route."
+];
+var COLORS = ["--accent", "--accent-2", "--accent-3", "--core"];
+var hop = 0, sel = 0;
+var lane = document.getElementById("lane");
+
+STOPS.forEach(function (s, i) {
+  var b = document.createElement("button");
+  b.className = "stop"; b.type = "button";
+  b.innerHTML = '<img src="' + (s.mule ? "mule.svg" : s.img) + '" alt="">'  +
+    '<div class="who">' + s.who + '</div><div class="where">' + s.where + "</div>";
+  b.onclick = function () { sel = i; render(); };
+  lane.appendChild(b);
+});
+
+function randLabel() {
+  var a = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_", s = "MN1.";
+  var r = new Uint8Array(110); crypto.getRandomValues(r);
+  for (var i = 0; i < r.length; i++) s += a[r[i] & 63];
+  return s + "… (926 chars)";
+}
+var label = randLabel();
+
+function parcelSvg(layers) {
+  // layers: how many sleeves are still on (3 -> 0), drawn as nested rounded boxes
+  var css = getComputedStyle(document.documentElement), out = "", w = 96, h = 72;
+  var steps = [[0, 0, 96, 72], [10, 8, 76, 56], [20, 16, 56, 40], [30, 24, 36, 24]];
+  for (var i = 3 - layers; i < 4; i++) {
+    var d = steps[i], fill = css.getPropertyValue(COLORS[i]).trim();
+    out += '<rect x="' + d[0] + '" y="' + d[1] + '" width="' + d[2] + '" height="' + d[3] + '" rx="' + (10 - i * 2) +
+      '" fill="' + fill + '" stroke="' + css.getPropertyValue("--ink").trim() + '" stroke-width="3"/>';
+  }
+  return '<svg viewBox="-4 -4 ' + (w + 8) + " " + (h + 8) + '">' + out + "</svg>";
+}
+
+function render() {
+  var stops = lane.children;
+  for (var i = 0; i < stops.length; i++) stops[i].classList.toggle("sel", i === sel);
+  var s = STOPS[sel];
+  document.getElementById("kTitle").textContent = s.who + (s.mule ? " (" + s.where + ")" : "") + " knows";
+  document.getElementById("kList").innerHTML = s.knows.map(function (k) {
+    return '<li class="' + k[0] + '">' + (k[0] === "y" ? "" : "does not know ") + k[1] + "</li>";
+  }).join("");
+  var p = document.getElementById("parcel");
+  var laneW = lane.getBoundingClientRect().width, col = laneW / 5;
+  p.style.left = Math.max(0, col * hop + col / 2 - 48) + "px";
+  p.innerHTML = parcelSvg(hop === 0 ? 3 : Math.max(0, 3 - hop));
+  document.getElementById("labelNow").textContent = hop >= 4 ? "(no label: it's in the recipient's locker)" : label;
+  document.getElementById("log").textContent = LOGS[hop];
+  document.getElementById("hopno").textContent = hop === 0 ? "at the sender" : hop >= 4 ? "delivered" : "hop " + hop + " of 3";
+  document.getElementById("next").disabled = hop >= 4;
+}
+document.getElementById("next").onclick = function () {
+  if (hop >= 4) return;
+  hop++; sel = hop; label = randLabel(); render();
+};
+document.getElementById("reset").onclick = function () { hop = 0; sel = 0; label = randLabel(); render(); };
+addEventListener("resize", render);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+document.getElementById("themeBtn").addEventListener("click", function () { setTimeout(render, 0); });
+render();
+</script>
+</body>
+</html>
