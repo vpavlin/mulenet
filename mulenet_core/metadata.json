@@ -1,0 +1,36 @@
+{
+  "name": "mulenet_core",
+  "display_name": "MuleNet Core",
+  "version": "0.1.0",
+  "type": "core",
+  "interface": "universal",
+  "category": "social",
+  "description": "MuleNet core: a physical mixnet for parcels. Signed hub directory synced over loam_core, onion shipping labels (Sphinx-style, fixed size), sealed hub-to-hub address grants, recipient mailboxes, custody receipts. Runs headless under logoscore and behind the mulenet ui_qml view.",
+  "main": "mulenet_core_plugin",
+  "dependencies": [
+    "loam_core"
+  ],
+  "nix": {
+    "packages": {
+      "build": [
+        "openssl"
+      ],
+      "runtime": [
+        "openssl"
+      ]
+    },
+    "external_libraries": [],
+    "cmake": {
+      "find_packages": [
+        "OpenSSL"
+      ],
+      "extra_sources": [],
+      "extra_include_dirs": [
+        "src"
+      ],
+      "extra_link_libraries": [
+        "OpenSSL::Crypto"
+      ]
+    }
+  }
+}

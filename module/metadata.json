@@ -1,0 +1,26 @@
+{
+  "name": "mulenet",
+  "display_name": "MuleNet - Physical Mixnet",
+  "version": "0.1.0",
+  "type": "ui_qml",
+  "category": "social",
+  "description": "Send a parcel through a chain of friends' hubs so nobody can link sender and recipient. Onion labels, sealed sleeves, hub directory, custody receipts. Pure-QML view over the mulenet_core module.",
+  "view": "Main.qml",
+  "icon": "icon.png",
+  "dependencies": [
+    "mulenet_core"
+  ],
+  "nix": {
+    "packages": {
+      "build": [],
+      "runtime": []
+    },
+    "external_libraries": [],
+    "cmake": {
+      "find_packages": [],
+      "extra_sources": [],
+      "extra_include_dirs": [],
+      "extra_link_libraries": []
+    }
+  }
+}
