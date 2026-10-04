@@ -113,6 +113,20 @@ Item {
         return names.join(", ") || "nothing yet"
     }
     function day(ms) { return ms ? new Date(ms).toISOString().slice(0, 10) : "" }
+    function addressText(a) {
+        if (!a) return ""
+        var parts = []
+        var keys = ["name", "locker", "street", "city", "carrier", "contact"]
+        for (var i = 0; i < keys.length; i++) if (a[keys[i]]) parts.push(a[keys[i]])
+        for (var k in a) if (keys.indexOf(k) < 0 && typeof a[k] === "string" && a[k]) parts.push(a[k])
+        return parts.join(", ")
+    }
+    function hubAcceptsAll() { return !!(root.st.hub && root.st.hub.card.policy && (root.st.hub.card.policy.accepts || []).indexOf("*") >= 0) }
+    function batchText() {
+        var dn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+        var b = (root.st.hub && root.st.hub.card.policy && root.st.hub.card.policy.batchDays) || [1, 4]
+        return b.map(function (d) { return dn[d] }).join(",")
+    }
 
     // ── reusable pieces ────────────────────────────────────────────────────────
     component Label2: Text { textFormat: Text.PlainText; color: root.cText2; font.pixelSize: 12; wrapMode: Text.Wrap }
@@ -129,6 +143,8 @@ Item {
     }
     component Field: TextField {
         Layout.fillWidth: true
+        Layout.minimumWidth: 80
+        Layout.preferredWidth: 200
         color: root.cText
         placeholderTextColor: root.cText3
         font.pixelSize: 13
@@ -136,13 +152,17 @@ Item {
     }
     component Pick: ComboBox {
         Layout.fillWidth: true
+        Layout.minimumWidth: 80
+        Layout.preferredWidth: 200
         font.pixelSize: 13
     }
     component Qr: Canvas {
         id: qrc
         property string text: ""
         property var m: null
-        implicitWidth: 220; implicitHeight: 220
+        // Whole-pixel modules (3 px) so a phone can scan the code off the screen.
+        implicitWidth: m ? (m.n + 8) * 3 : 260
+        implicitHeight: implicitWidth
         onTextChanged: {
             if (!text) { m = null; requestPaint(); return }
             if (root.qrCache[text]) { m = root.qrCache[text]; requestPaint(); return }
@@ -155,7 +175,7 @@ Item {
             var ctx = getContext("2d")
             ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, width, height)
             if (!m) return
-            var q = Math.floor(Math.min(width, height) / (m.n + 8))
+            var q = Math.max(1, Math.floor(Math.min(width, height) / (m.n + 8)))
             var off = Math.floor((Math.min(width, height) - q * m.n) / 2)
             ctx.fillStyle = "#000000"
             for (var y = 0; y < m.n; y++) for (var x = 0; x < m.n; x++)
@@ -183,6 +203,7 @@ Item {
             Repeater {
                 model: [["send", "Send"], ["receive", "Receive"], ["hub", "My hub"], ["directory", "Directory"]]
                 delegate: LogosButton {
+                    Layout.preferredWidth: 120
                     text: (root.tab === modelData[0] ? "> " : "") + modelData[1]
                     onClicked: root.tab = modelData[0]
                 }
@@ -200,13 +221,14 @@ Item {
         }
 
         ScrollView {
+            id: scroller
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
             contentWidth: availableWidth
 
             ColumnLayout {
-                width: parent.width
+                width: scroller.availableWidth
                 spacing: root.sp
 
                 // ════ SEND ════
@@ -371,13 +393,13 @@ Item {
                             Small { text: "Country (2 letters)" }
                             Field { id: hCountry; text: root.st.hub ? root.st.hub.card.country : ""; maximumLength: 2 }
                             Small { text: "Carries" }
-                            Pick { id: hAccepts; model: ["anything (sealed, undeclared ok)", "declared goods only (no 'undeclared')"] }
+                            Pick { id: hAccepts; model: ["anything (sealed, undeclared ok)", "declared goods only (no 'undeclared')"]; currentIndex: root.st.hub ? (root.hubAcceptsAll() ? 0 : 1) : 0 }
                             Small { text: "Ships on (weekdays)" }
-                            Field { id: hBatch; text: "Mon,Thu"; placeholderText: "e.g. Mon,Thu - batching hides timing" }
+                            Field { id: hBatch; text: root.batchText(); placeholderText: "e.g. Mon,Thu - batching hides timing" }
                             Small { text: "Max hold (days)" }
-                            Field { id: hHold; text: "7" }
+                            Field { id: hHold; text: root.st.hub && root.st.hub.card.policy ? String(root.st.hub.card.policy.holdMaxDays || 7) : "7" }
                             Small { text: "Where senders hand over" }
-                            Field { id: hIntake; placeholderText: "public intake only, e.g. 'at the monthly Circle meetup'" }
+                            Field { id: hIntake; text: root.st.hub && root.st.hub.card.intake ? (root.st.hub.card.intake.text || "") : ""; placeholderText: "public intake only, e.g. 'at the monthly Circle meetup'" }
                         }
                         RowLayout {
                             LogosButton {
@@ -429,7 +451,7 @@ Item {
                             Heading { text: todo ? ("Ship by " + modelData.shipDay + " to " + modelData.nextHubName) : (modelData.status === "refused" ? "Refused" : "Shipped") }
                             Label2 { visible: modelData.status === "refused"; color: root.cErr; text: modelData.reason || "" }
                             Label2 { visible: todo; Layout.fillWidth: true; text: "1. Remove the outer sleeve sealed " + modelData.removeSleeve + " and throw away the old box and label.\n2. Put the rest in a plain " + modelData.boxClass + " box, add " + modelData.paddingGrams + " g of padding.\n3. Print the new label below and stick it on." }
-                            Label2 { visible: todo; text: "Ship to: " + JSON.stringify(modelData.address || {}) }
+                            Label2 { visible: todo; Layout.fillWidth: true; font.pixelSize: 14; color: root.cText; text: "Ship to: " + root.addressText(modelData.address) }
                             RowLayout {
                                 visible: todo && !!modelData.nextLabel
                                 Qr { text: todo && modelData.nextLabel ? modelData.nextLabel : "" }
