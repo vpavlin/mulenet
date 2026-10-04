@@ -31,6 +31,7 @@ catch-up. Payments and bonds on LEZ come later (docs/ROADMAP.md).
 - **Android hub app:** not started (next; the hub flow is the phone's job: scan, peel, print).
 - **Not yet used with real parcels.** The first real run is a 3D-printed item through a few
   friends; see docs/HUB-GUIDE.md.
+- Website (draft): https://vpavlin.github.io/mulenet/ (source in site/).
 - Contents inspection is deliberately **not** part of the design yet: docs/OPEN-PROBLEMS.md.
 
 ## Layout
