@@ -6,6 +6,8 @@ import { sha256 } from "@noble/hashes/sha2.js";
 import { x25519 } from "@noble/curves/ed25519.js";
 import { buildLabel, peelLabel, HOP_RELAY, HOP_EXIT, sealTo, makeReceipt, sleeveCodeText, newIdentity, makeEvent } from "../src/index.mjs";
 import { hex, enc } from "../src/bytes.mjs";
+import { network, PARCEL, T0 } from "./fixtures.mjs";
+import { planRoute } from "../src/index.mjs";
 
 function stream(seed) {
   let ctr = 0;
@@ -63,4 +65,19 @@ sleeve.text = sleeveCodeText(Uint8Array.from(sleeve.bytes.match(/../g).map((x) =
 const id = newIdentity(keyRng(32), () => 1790000000000);
 const event = makeEvent(id, "hub.announce", { name: "Prague mule", city: "Prague", country: "CZ", policy: { accepts: ["*"], maxWeightClass: 3 }, labelKeys: [] });
 
-console.log(JSON.stringify({ labels, seal, receipt, sleeve, event }, null, 1));
+// A whole network: the C++ side folds this log, then walks the JS-planned parcel through
+// its own hub logic, and plans + walks one of its own.
+const net = network();
+const route = planRoute(net.state, PARCEL, { entry: net.hubs[0].address, mailboxRef: net.mailbox.card.mailboxRef, hops: 3, atMs: T0 });
+const networkVec = {
+  roots: [net.steward.address],
+  log: net.log,
+  hubs: net.hubs.map((h) => ({ address: h.address, labelPrivs: h.labelPrivs.map(hex), boxPriv: hex(h.boxPriv), policy: h.policy, city: h.card.city })),
+  mailboxRef: net.mailbox.card.mailboxRef,
+  notify: hex(net.mailbox.notifyToken),
+  T0,
+  parcel: PARCEL,
+  route: { path: route.path, label: route.label.text, sleeves: route.hops.map((h) => sleeveCodeText(h.routing.sleeveCode)), custody: route.tracking.custody.map(hex) },
+};
+
+console.log(JSON.stringify({ labels, seal, receipt, sleeve, event, network: networkVec }, null, 1));
