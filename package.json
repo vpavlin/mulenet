@@ -1,0 +1,10 @@
+{
+  "name": "mulenet",
+  "private": true,
+  "type": "module",
+  "workspaces": ["packages/core", "sim"],
+  "scripts": {
+    "test": "npm test -w @mulenet/core",
+    "sim": "node sim/run.mjs"
+  }
+}

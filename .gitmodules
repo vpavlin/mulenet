@@ -1,0 +1,3 @@
+[submodule "vendor/loam-sync"]
+	path = vendor/loam-sync
+	url = https://github.com/vpavlin/loam-sync
