@@ -46,10 +46,10 @@ export function processArrival(hub, state, scan, rng = randomBytes) {
   const r = peeled.routing;
   const tag = hex(peeled.replayTag);
   const receipts = [];
-  const post = (token, body) => {
+  const post = (token, body, whenMs = at) => {
     // Post receipts after a random 2-30 h delay so they don't line up with carrier scans.
     const delay = uniformInt(2, 30, rng) * 3600000;
-    receipts.push({ ...makeReceipt(token, { ...body, day: dayOf(at) }), postAfterMs: at + delay });
+    receipts.push({ ...makeReceipt(token, { ...body, day: dayOf(whenMs) }), postAfterMs: whenMs + delay });
   };
   const refuse = (reason) => {
     post(r.custodyIn, { kind: "refused", reason });
@@ -88,7 +88,7 @@ export function processArrival(hub, state, scan, rng = randomBytes) {
     if (!g || g.from !== hub.address) return refuse("no address grant for the next hop (revoked?)");
     let address;
     try { address = openSealed(hub.boxPriv, fromB64url(g.sealed), grantContext(g.from, g.to)); } catch { return refuse("next hop's address grant can't be opened"); }
-    post(r.custodyOut, { kind: "shipped", shipDay: dayOf(shipMs) });
+    post(r.custodyOut, { kind: "shipped" }, shipMs);
     return {
       action: "relay",
       routing: r,
@@ -104,7 +104,7 @@ export function processArrival(hub, state, scan, rng = randomBytes) {
   if (!m || m.exit !== hub.address) return refuse("unknown mailbox");
   let pickup;
   try { pickup = openSealed(hub.boxPriv, fromB64url(m.sealed), mailboxContext(m.exit, ref)); } catch { return refuse("mailbox can't be opened"); }
-  post(r.custodyOut, { kind: "delivered", shipDay: dayOf(shipMs) });
+  post(r.custodyOut, { kind: "delivered" }, shipMs);
   if (pickup.notify) {
     const t = Uint8Array.from(pickup.notify.match(/../g).map((h) => parseInt(h, 16)));
     receipts.push({ ...makeReceipt(t, { kind: "ready", day: dayOf(shipMs) }), postAfterMs: shipMs });

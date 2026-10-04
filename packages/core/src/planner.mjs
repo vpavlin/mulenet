@@ -83,7 +83,15 @@ export function planRoute(state, parcel, opts) {
   if (n < 1 || n > MAX_HOPS) throw new Error(`route length must be 1..${MAX_HOPS}`);
   const mailbox = state.mailboxes.get(opts.mailboxRef);
   if (!mailbox) throw new Error("unknown mailbox");
-  const path = findPath(state, { entry: opts.entry, exit: mailbox.exit, hops: n, parcel, minVouches: opts.minVouches ?? 1, rng });
+  const minVouches = opts.minVouches ?? 1;
+  // Name the specific reason when an endpoint can't take the parcel; it's the common case.
+  for (const [role, addr] of [["entry", opts.entry], ["exit", mailbox.exit]]) {
+    const h = state.hubs.get(addr);
+    if (!h) throw new Error(`${role} hub is not in the directory`);
+    if (h.vouchedBy.length < minVouches) throw new Error(`${role} hub ${h.name} has no steward vouch`);
+    if (!policyAccepts(h, parcel)) throw new Error(`${role} hub ${h.name} does not carry this parcel (category/size policy)`);
+  }
+  const path = findPath(state, { entry: opts.entry, exit: mailbox.exit, hops: n, parcel, minVouches, rng });
   if (!path) throw new Error("no route satisfies the constraints (try fewer hops, another entry hub, or a broader category)");
 
   const at = opts.atMs ?? Date.now();

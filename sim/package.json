@@ -1,0 +1,6 @@
+{
+  "name": "@mulenet/sim",
+  "private": true,
+  "type": "module",
+  "dependencies": { "@mulenet/core": "*", "qrcode": "^1.5.4" }
+}

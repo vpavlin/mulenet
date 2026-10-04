@@ -88,7 +88,7 @@ test("a re-sent copy of the same label is refused (replay)", () => {
 test("hubs that only carry declared goods are routed around for 'undeclared' parcels", () => {
   const net = network({ accepts: [1, 2, 3] });
   const undeclared = { ...PARCEL, category: categoryId("undeclared") };
-  assert.throws(() => planRoute(net.state, undeclared, { entry: net.hubs[0].address, mailboxRef: net.mailbox.card.mailboxRef, hops: 3 }), /no route/);
+  assert.throws(() => planRoute(net.state, undeclared, { entry: net.hubs[0].address, mailboxRef: net.mailbox.card.mailboxRef, hops: 3 }), /does not carry/);
   // and a hub refuses one that reaches it anyway
   const ok = planRoute(net.state, PARCEL, { entry: net.hubs[0].address, mailboxRef: net.mailbox.card.mailboxRef, hops: 3, atMs: T0 });
   net.hubs[0].policy = { ...net.hubs[0].policy, accepts: [2] };
@@ -117,7 +117,7 @@ test("unsigned or forged registry events are ignored", () => {
   const s = foldRegistry([...net.log, forged], [net.steward.address]);
   assert.equal(s.hubs.get(net.hubs[0].address).city, "Prague");
   const unvouched = foldRegistry(net.log.filter((e) => e.type !== "vouch"), [net.steward.address]);
-  assert.throws(() => planRoute(unvouched, PARCEL, { entry: net.hubs[0].address, mailboxRef: net.mailbox.card.mailboxRef, hops: 3 }), /no route/);
+  assert.throws(() => planRoute(unvouched, PARCEL, { entry: net.hubs[0].address, mailboxRef: net.mailbox.card.mailboxRef, hops: 3 }), /no steward vouch/);
 });
 
 test("hold days and batch days push the ship date forward", () => {
