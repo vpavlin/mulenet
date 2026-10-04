@@ -18,7 +18,9 @@ using namespace mulenet;
 using ojson = nlohmann::ordered_json;
 
 static const char* MULENET_VERSION = "0.1.0";
-static constexpr long long CATCHUP_EVERY_MS = 30000;
+// Each catch-up frame rides SDS (~19 KB on the wire) and counts against the shared node's
+// RLN budget (100 msgs / 10 min per node, all apps): reconcile every 2 min, not every 30 s.
+static constexpr long long CATCHUP_EVERY_MS = 120000;
 static constexpr long long RECEIPT_RETENTION_MS = 90LL * DAY_MS;
 
 // ---- small helpers -----------------------------------------------------------------------
