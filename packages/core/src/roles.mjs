@@ -3,7 +3,7 @@ import { newIdentity, announce, grant, createMailbox } from "./registry.mjs";
 import { newLabelKey } from "./label.mjs";
 import { newBoxKey, sealTo } from "./seal.mjs";
 import { grantContext, mailboxContext } from "./hub.mjs";
-import { openReceipt, custodyTopic } from "./receipts.mjs";
+import { openReceipt, receiptMatches } from "./receipts.mjs";
 import { hex, fromHex, randomBytes } from "./bytes.mjs";
 
 /**
@@ -52,20 +52,12 @@ export function createRecipientMailbox(exitHub, pickup) {
 }
 
 /**
- * The sender's private tracker: turns custody receipts into a progress timeline.
- * tokens: tracking.custody from planRoute.
+ * The sender's private tracker: turn whatever receipts arrived on the shared
+ * receipts topic into a per-step timeline. `tracking` comes from planRoute.
  */
-export function trackerTopics(tracking) {
-  return tracking.custody.map((t, i) => ({ index: i, topic: custodyTopic(t), token: t }));
-}
-
-/** Decode whatever receipts arrived into a per-step timeline. */
 export function trackProgress(tracking, inbox) {
-  const steps = tracking.custody.map((t, i) => {
-    const topic = custodyTopic(t);
-    const got = inbox.filter((m) => m.topic === topic).map((m) => openReceipt(t, topic, m.bytes)).filter(Boolean);
-    return { index: i, receipts: got };
-  });
-  return steps;
+  return tracking.custody.map((t, i) => ({
+    index: i,
+    receipts: inbox.filter((m) => receiptMatches(t, m.bytes)).map((m) => openReceipt(t, m.bytes)).filter(Boolean),
+  }));
 }
-

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Build + run the C++ tests without nix (system g++, OpenSSL, nlohmann-json, Qt6Core).
+#   mulenet_core/test/run-tests.sh
+set -euo pipefail
+HERE="$(cd "$(dirname "$0")" && pwd)"
+OUT="${MN_TEST_OUT:-${TMPDIR:-/tmp}/mulenet-ctest}"
+mkdir -p "$OUT"
+CXX="g++ -std=c++20 -O1 -g -Wall -Wno-deprecated-declarations -I$HERE/../src"
+$CXX "$HERE/parity_test.cpp" -lcrypto -o "$OUT/parity_test"
+"$OUT/parity_test" "$HERE/vectors.json"

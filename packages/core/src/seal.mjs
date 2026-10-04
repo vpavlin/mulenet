@@ -17,9 +17,9 @@ function key(shared, ephPub, recipientPub) {
 }
 
 /** Seal `plaintext` (Uint8Array or JSON-able value) to an X25519 public key. */
-export function sealTo(recipientPub, plaintext, context) {
+export function sealTo(recipientPub, plaintext, context, rng = randomBytes) {
   const pt = plaintext instanceof Uint8Array ? plaintext : enc.encode(JSON.stringify(plaintext));
-  const eph = randomBytes(32);
+  const eph = rng(32);
   const ephPub = x25519.getPublicKey(eph);
   const k = key(x25519.getSharedSecret(eph, recipientPub), ephPub, recipientPub);
   // Key is unique per blob (fresh ephemeral), so a zero nonce is safe.

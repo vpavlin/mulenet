@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  planRoute, processArrival, trackProgress, foldRegistry, merge, openReceipt, custodyTopic,
+  planRoute, processArrival, trackProgress, foldRegistry, merge, openReceipt,
   sleeveCodeText, revokeGrant, retire, categoryId, grantFor,
 } from "../src/index.mjs";
 import { network, PARCEL, T0 } from "./fixtures.mjs";
@@ -48,7 +48,7 @@ test("a parcel travels entry → middle → exit and only the right people learn
   const steps = trackProgress(route.tracking, inbox);
   assert.deepEqual(steps.map((s) => s.receipts.map((r) => r.kind).sort()), [["received"], ["received", "shipped"], ["received", "shipped"], ["delivered"]]);
   const notify = net.mailbox.notifyToken;
-  const ready = inbox.filter((m) => m.topic === custodyTopic(notify)).map((m) => openReceipt(notify, m.topic, m.bytes));
+  const ready = inbox.map((m) => openReceipt(notify, m.bytes)).filter(Boolean);
   assert.equal(ready[0].kind, "ready");
 });
 
@@ -64,7 +64,7 @@ test("receipts are unreadable without the custody token", () => {
   const route = planRoute(net.state, PARCEL, { entry: net.hubs[0].address, mailboxRef: net.mailbox.card.mailboxRef, hops: 3, atMs: T0 });
   const { inbox } = walk(net, route);
   const wrong = new Uint8Array(16);
-  for (const m of inbox) assert.equal(openReceipt(wrong, m.topic, m.bytes), null);
+  for (const m of inbox) assert.equal(openReceipt(wrong, m.bytes), null);
 });
 
 test("a swapped sleeve is refused and reported back, the parcel goes no further", () => {
