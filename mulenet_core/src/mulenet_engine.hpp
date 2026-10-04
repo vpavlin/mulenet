@@ -261,7 +261,9 @@ struct HubKeys {
     std::set<std::string> seen;   // replay tags (hex)
     int boxGrams = 120, sleeveGrams = DEFAULT_SLEEVE_G;
 };
-struct OutReceipt { Bytes bytes; long long postAfterMs = 0; };
+// kind: received/refused post right away; shipped/delivered/ready wait until the hub
+// confirms it actually handed the box over (the app's markShipped).
+struct OutReceipt { Bytes bytes; long long postAfterMs = 0; std::string kind; };
 struct Arrival {
     std::string action;   // relay | exit | refuse
     std::string reason;
@@ -270,6 +272,7 @@ struct Arrival {
     std::string removeSleeve, shipDay, nextHub, nextLabel;
     json address;         // where to ship (relay: next hub's handoff; exit: recipient pickup)
     int paddingGrams = 0;
+    std::string notify;   // exit only: the recipient's notify token (hex), kept out of `address`
     std::vector<OutReceipt> receipts;
 };
 
@@ -298,7 +301,8 @@ inline Arrival processArrival(HubKeys& hub, const Directory& d, const std::strin
     auto post = [&](const Bytes& token, nlohmann::ordered_json body, long long whenMs) {
         body["day"] = dayOf(whenMs);
         long long delay = (long long)uniform(2, 30) * 3600000LL;
-        out.receipts.push_back({makeReceipt(token, body, rng), whenMs + delay});
+        std::string kind = body.value("kind", "");
+        out.receipts.push_back({makeReceipt(token, body, rng), whenMs + delay, kind});
     };
     auto refuse = [&](const std::string& why) {
         post(r.custodyIn, {{"kind", "refused"}, {"reason", why}}, atMs);
@@ -349,9 +353,10 @@ inline Arrival processArrival(HubKeys& hub, const Directory& d, const std::strin
     if (!openSealedJson(hub.boxPriv, blob, mailboxContext(m->second.exit, ref), out.address)) return refuse("mailbox can't be opened");
     post(r.custodyOut, {{"kind", "delivered"}}, shipMs);
     std::string notify = out.address.value("notify", "");
+    out.notify = notify;
     if (notify.size() == 32) {
         nlohmann::ordered_json b = {{"kind", "ready"}, {"day", dayOf(shipMs)}};
-        out.receipts.push_back({makeReceipt(unhex(notify), b, rng), shipMs});
+        out.receipts.push_back({makeReceipt(unhex(notify), b, rng), shipMs, "ready"});
     }
     out.address.erase("notify");
     out.action = "exit";
