@@ -76,7 +76,8 @@ nav .spacer{flex:1}
 .btn:hover{transform:translate(-1px,-1px)}
 .btn.primary{background:var(--accent);color:#fff;border-color:var(--ink)}
 
-.warn{margin-top:28px;border:2px dashed var(--warn);border-radius:16px;padding:16px 20px;background:color-mix(in srgb,var(--warn) 9%,transparent)}
+.disclaimer{margin:26px 0 0;padding:12px 18px;border-left:4px solid var(--ink);background:var(--surface);border-radius:0 12px 12px 0;font-size:15.5px}
+.warn{margin-top:16px;border:2px dashed var(--warn);border-radius:16px;padding:16px 20px;background:color-mix(in srgb,var(--warn) 9%,transparent)}
 .warn strong{color:var(--warn)}
 .warn ul{margin:6px 0 0;padding-left:20px}
 
@@ -161,6 +162,8 @@ footer .row{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
   </div>
 </header>
 
+<p class="disclaimer"><strong>Not endorsed by or affiliated with Logos.</strong> MuleNet is an independent experiment by people who like mules. It is built on the Logos tech stack; that is the whole relationship.</p>
+
 <div class="warn">
   <strong>Honest status: zero parcels have been carried. The mules haven't left the stable.</strong>
   <ul>
@@ -179,7 +182,7 @@ footer .row{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
     <div class="card"><div class="k">The onion</div><div class="v">A label that peels</div><p class="muted">The QR label is a fixed-size onion. Each hub scans it and learns only where to send the box next, then prints a fresh label for the next leg. Every label is the same size, so no hub can tell how far the box has come.</p></div>
     <div class="card"><div class="k">The layers</div><div class="v">One sleeve per mule</div><p class="muted">The item sits inside one sealed sleeve per hop. Each hub takes off exactly one and checks its seal code. The hubs on either side of an honest hub never even see the same wrapping.</p></div>
     <div class="card"><div class="k">The disguise</div><div class="v">New box, same weight</div><p class="muted">Hubs throw the old box away, use a plain standard one and pad it to a standard weight. They hold the box a few random days and ship on fixed batch days, so arrival and departure don't line up.</p></div>
-    <div class="card"><div class="k">The receipts</div><div class="v">Hee-haws over Logos</div><p class="muted">Each hub posts "received" and "shipped" receipts over Logos Messaging. They're sealed so only the sender, and the hubs either side, can read them. The sender sees progress; nobody else sees a route.</p></div>
+    <div class="card"><div class="k">The receipts</div><div class="v">Hee-haws over the wire</div><p class="muted">Each hub posts "received" and "shipped" receipts over Logos Messaging. They're sealed so only the sender, and the hubs either side, can read them. The sender sees progress; nobody else sees a route.</p></div>
   </div>
 </section>
 
@@ -213,11 +216,11 @@ footer .row{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
     </div>
   </div>
   <div class="list">
-    <div class="item"><div class="n">1</div><div><h3>No mule's home address, ever</h3><p>A hub's address is never published. It's sealed hub-to-hub, so only the hubs it chooses to receive from can read it. Senders never get one; they hand parcels over at a public intake, like a Logos Circle meetup or a parcel locker.</p></div></div>
+    <div class="item"><div class="n">1</div><div><h3>No mule's home address, ever</h3><p>A hub's address is never published. It's sealed hub-to-hub, so only the hubs it chooses to receive from can read it. Senders never get one; they hand parcels over at a public intake, like a community meetup or a parcel locker.</p></div></div>
     <div class="item"><div class="n">2</div><div><h3>Mules don't open the luggage</h3><p>Nobody looks inside, the same way the post office doesn't. A hub weighs and measures the box, checks one seal code, and takes off one outer sleeve. That's all.</p></div></div>
     <div class="item"><div class="n">3</div><div><h3>Mules say no whenever they like</h3><p>Every hub publishes what it's willing to carry: anything, or declared categories only. A hub can refuse any parcel, and the refusal goes back to the sender.</p></div></div>
     <div class="item"><div class="n">4</div><div><h3>Every handover leaves an alibi</h3><p>When the next hub confirms "received, seal intact", that receipt is the previous hub's proof that it passed the parcel on untouched. It's sealed, never public.</p></div></div>
-    <div class="item"><div class="n">5</div><div><h3>Only vetted mules on the route</h3><p>Routes only use hubs vouched for by a steward the sender trusts, such as a Logos Circle steward or the sender themselves. Mules are stubborn about privacy. We consider that a feature.</p></div></div>
+    <div class="item"><div class="n">5</div><div><h3>Only vetted mules on the route</h3><p>Routes only use hubs vouched for by a steward the sender trusts, such as someone from their own community, or the sender themselves. Mules are stubborn about privacy. We consider that a feature.</p></div></div>
   </div>
 </section>
 
@@ -239,10 +242,10 @@ footer .row{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
   <p class="lede">The plan is to get the boring parts ready now, so it works when the first people try it.</p>
   <div class="grid">
     <div class="card"><div class="k">Run a hub</div><div class="v">Friends first</div><p class="muted">Got a parcel locker nearby, a few plain boxes and a kitchen scale? Read the <a href="https://github.com/vpavlin/mulenet/blob/main/docs/HUB-GUIDE.md">hub guide</a> and tell us your city. We're starting with a handful of people in the EU.</p></div>
-    <div class="card"><div class="k">Logos Circles</div><div class="v">Stewards &amp; meetups</div><p class="muted">Circles meet in person every month, which makes them a natural place to hand over parcels, and their stewards natural people to vouch for hubs. There are 58 active Circles in 36 countries.</p></div>
+    <div class="card"><div class="k">Communities</div><div class="v">Stewards &amp; meetups</div><p class="muted">Groups that already meet in person (a hackerspace, a local meetup) make natural hand-over points, and their organisers natural people to vouch for hubs. MuleNet is independent: no community is involved unless its members choose to be.</p></div>
     <div class="card"><div class="k">Builders</div><div class="v">Poke holes in it</div><p class="muted">Read the <a href="https://github.com/vpavlin/mulenet/blob/main/docs/SPEC.md">spec</a> and the <a href="https://github.com/vpavlin/mulenet/blob/main/docs/THREAT-MODEL.md">threat model</a>, and break things. An Android hub app (scan, peel, print) is next.</p></div>
   </div>
-  <p style="margin-top:22px" class="muted">Built on the Logos stack:</p>
+  <p style="margin-top:22px" class="muted">Built on the Logos tech stack (not endorsed by or affiliated with Logos):</p>
   <div class="stack">
     <span class="tag">Basecamp module (desktop)</span>
     <span class="tag">Loam / Logos Messaging</span>
@@ -255,7 +258,7 @@ footer .row{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
 <footer>
   <div class="row">
     <img src="mule.svg" alt="" width="40">
-    <span>MuleNet · MIT or Apache-2.0 · <a href="https://github.com/vpavlin/mulenet">github.com/vpavlin/mulenet</a></span>
+    <span>MuleNet · an independent experiment, not endorsed by or affiliated with Logos · built on the Logos tech stack · MIT or Apache-2.0 · <a href="https://github.com/vpavlin/mulenet">github.com/vpavlin/mulenet</a></span>
   </div>
   <p style="margin-top:10px">No mules were harmed in the making of this protocol. Several were confused, which is how it's supposed to work.</p>
 </footer>
@@ -282,7 +285,7 @@ var STOPS = [
     ["y", "the whole route: Prague, Berlin, Madrid"], ["y", "what's inside"],
     ["n", "any hub's address"], ["n", "where the recipient picks it up"] ] },
   { who: "Mule 1", where: "Prague", mule: true, knows: [
-    ["y", "the sender handed it over at the Circle meetup"], ["y", "Berlin's locker address (sealed to Prague only)"],
+    ["y", "the sender handed it over at a community meetup"], ["y", "Berlin's locker address (sealed to Prague only)"],
     ["n", "what's inside"], ["n", "the recipient, or that Madrid exists on this route"] ] },
   { who: "Mule 2", where: "Berlin", mule: true, knows: [
     ["y", "a box came from Prague"], ["y", "Madrid's locker address (sealed to Berlin only)"],

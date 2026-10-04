@@ -1,5 +1,8 @@
 # MuleNet
 
+> **Not endorsed by or affiliated with Logos.** MuleNet is an independent experiment, built on the
+> Logos tech stack. It is untested with real parcels; see Status below.
+
 **A physical mixnet.** A parcel hops through a chain of friends' hubs so that nobody, not the
 hubs, not the carriers, not an observer, can link the sender to the recipient. Hubs are kept as
 safe as we know how: they never open a parcel, never publish their address, and only ever learn
@@ -17,7 +20,7 @@ It's the onion routing idea applied to boxes:
 | exit node | the recipient's **mailbox** - a pickup point only the exit hub can read |
 | delivery receipts | **custody receipts** over Logos Messaging, readable only by the neighbours and the sender |
 
-Built on the Logos stack: a Basecamp module (`mulenet_core` + the `mulenet` view) that syncs a
+Built on the Logos tech stack: a Basecamp module (`mulenet_core` + the `mulenet` view) that syncs a
 signed hub directory and the receipts over [Loam](https://github.com/vpavlin/loam-basecamp)
 (Logos Delivery), with the [loam-sync](https://github.com/vpavlin/loam-sync) event log + RBSR
 catch-up. Payments and bonds on LEZ come later (docs/ROADMAP.md).
